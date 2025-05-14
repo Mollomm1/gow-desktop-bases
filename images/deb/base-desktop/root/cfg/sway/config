@@ -1,0 +1,26 @@
+# Default config for sway
+#
+# Copy this to ~/.config/sway/config and edit it to your liking.
+#
+# Read `man 5 sway` for a complete reference.
+
+# we will launch xwayland ourself
+xwayland disable
+
+# Font, borders, and gaps
+    gaps inner 0
+    gaps outer 0
+    gaps top 0
+    gaps bottom 0
+    default_border pixel 0
+    default_floating_border pixel 
+
+# Colours
+    client.background n/a #434c5e n/a
+    client.focused #4C566A #434c5e #eceff4 #434c5e #434c5e
+    client.focused_inactive #3b4252 #3b4252 #eceff4 #3b4252 #3b4252
+    client.unfocused #3b4252 #3b4252 #eceff4 #3b4252 #3b4252
+    client.urgent #4C566A #434c5e #eceff4 #434c5e #434c5e
+
+# Need to autostart something after this line, for example:
+# see: launch-comp.sh

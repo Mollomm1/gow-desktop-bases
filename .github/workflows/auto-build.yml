@@ -1,0 +1,130 @@
+name: Auto Build and Push Images
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'images/**'
+  schedule:
+    # Run weekly on Sunday at midnight
+    - cron: '0 0 * * 0'
+  workflow_dispatch:  # Allow manual triggering
+
+# Add explicit permissions block
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: mollomm1
+
+jobs:
+  build-and-push-desktop-base:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu
+            version: "24.04"
+            type: deb
+            base-app: "ghcr.io/mollomm1/ubuntu-24.04-base-app:latest"
+          - distro: ubuntu
+            version: "22.04"
+            type: deb
+            base-app: "ghcr.io/mollomm1/ubuntu-22.04-base-app:latest"
+          - distro: debian
+            version: "12"
+            type: deb
+            base-app: "ghcr.io/mollomm1/debian-12-base-app:latest"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate version
+        id: version
+        run: |
+          for version in ${{ join(matrix.distro.versions, ' ') }}; do
+            echo "version=${version}" >> $GITHUB_OUTPUT
+            break
+          done
+      
+      - name: Build and push base-desktop image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./images/${{ matrix.type }}/base-desktop
+          file: ./images/${{ matrix.type }}/base-desktop/Dockerfile
+          build-args: |
+            BASE_APP_IMAGE=${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.distro }}-${{ matrix.version }}-base-app:latest
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.distro }}-${{ matrix.version }}-base-desktop:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  
+  build-and-push-desktops:
+    runs-on: ubuntu-latest
+    needs: build-and-push-desktop-base
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu-24.04-xfce
+            basedesktop: "ghcr.io/mollomm1/ubuntu-24.04-base-desktop:latest"
+          - name: ubuntu-24.04-kde
+            basedesktop: "ghcr.io/mollomm1/ubuntu-24.04-base-desktop:latest"
+          - name: ubuntu-22.04-xfce
+            basedesktop: "ghcr.io/mollomm1/ubuntu-22.04-base-desktop:latest"
+          - name: ubuntu-22.04-kde
+            basedesktop: "ghcr.io/mollomm1/ubuntu-22.04-base-desktop:latest"
+          - name: debian-12-xfce
+            basedesktop: "ghcr.io/mollomm1/debian-12-base-desktop:latest"
+          - name: debian-12-kde
+            basedesktop: "ghcr.io/mollomm1/debian-12-base-desktop:latest"
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate version
+        id: version
+        run: |
+          for version in ${{ join(matrix.distro.versions, ' ') }}; do
+            echo "version=${version}" >> $GITHUB_OUTPUT
+            break
+          done
+      
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./desktops/${{ matrix.name }}
+          file: ./desktops/${{ matrix.name }}/Dockerfile
+          build-args: |
+            BASE_DESKTOP_IMAGE=${{ matrix.basedesktop }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
