@@ -30,6 +30,8 @@ Most of the Dockerfiles for desktop images are heavily based on [webtop](https:/
 
 To add one of the following configurations to your `config.toml` (by default located at `/etc/wolf/cfg/config.toml`), use the details below:
 
+<details>
+
 <summary>Debian 12 XFCE (Without Flatpak)</summary>
 
 ```toml
