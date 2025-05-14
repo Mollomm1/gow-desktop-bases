@@ -1,4 +1,6 @@
 # gow-desktop-bases
+| [Base Images](https://github.com/Mollomm1/gow-bases) | [Desktop Base Images](#) | [Desktop Images](https://github.com/Mollomm1/gow-desktops) |
+|-------------- |------|------|
 
 Base images for creating desktop containers for Wolf.
 
