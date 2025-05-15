@@ -18,7 +18,7 @@ RUN apt-get update -y && \
 COPY root /
 
 RUN chmod 777 /opt/gow/desktop.sh /opt/gow/dbus.sh /opt/gow/xorg.sh /opt/gow/startup.sh && \
-    echo -e "\nALL ALL=NOPASSWD: /opt/gow/dbus.sh" >> /etc/sudoers
+    echo "ALL ALL=NOPASSWD: /opt/gow/dbus.sh" > /etc/sudoers.d/dbus
 
 # force running sway by default
 ENV RUN_SWAY=1 
