@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DISPLAY=:9
+
 function wait_for_x_display() {
     local display=":9"
     local max_attempts=100
