@@ -32,8 +32,7 @@ function launch_xorg() {
     # start xwayland at :9
     Xwayland :9 &
     wait_for_x_display
-    XWAYLAND_OUTPUT=$(xrandr --display :9 | grep " connected" | awk '{print $1}')
-    xrandr --output "$XWAYLAND_OUTPUT" --mode "${GAMESCOPE_WIDTH}x${GAMESCOPE_HEIGHT}"
+    XWAYLAND_OUTPUT=$(xrandr --display :9 | grep " connected" | awk '{print $1}') & (sleep 3; xrandr --output "$XWAYLAND_OUTPUT" --mode "${GAMESCOPE_WIDTH}x${GAMESCOPE_HEIGHT}")
 }
 
 launch_xorg
